@@ -174,7 +174,8 @@ fn controls(board: &mut Vec<Vec<Cell>>) {
     if let Ok(Event::Key(key_event)) = read() {
         unsafe {
             if key_event.modifiers == KeyModifiers::NONE && key_event.code == KeyCode::Enter {
-                if board[POS_Y][POS_X].value == 9 {
+                if board[POS_Y][POS_X].value == 9 && board[POS_Y][POS_X].state != CellState::Flagged
+                {
                     END = GameState::Loosed;
                 }
 
