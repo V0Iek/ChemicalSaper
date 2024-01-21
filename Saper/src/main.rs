@@ -3,28 +3,42 @@ use rand::Rng;
 use std::io::{self, Write};
 use std::usize;
 
+#[derive(Clone, Copy, PartialEq)]
+enum CellState {
+    Hidden,
+    Revealed,
+    Flagged,
+}
+
 #[derive(Clone, Copy)]
 struct Cell {
     value: i32,
-    reveled: bool,
+    state: CellState,
+}
+
+#[derive(PartialEq)]
+enum GameState {
+    InProgress,
+    Loosed,
+    Won,
 }
 
 static mut BOARD: [[Cell; 16]; 16] = [[Cell {
     value: 0,
-    reveled: false,
+    state: CellState::Hidden,
 }; 16]; 16];
 
 static mut POS_X: usize = 0;
 static mut POS_Y: usize = 0;
 
-static mut END: i32 = 0;
+static mut END: GameState = GameState::InProgress;
 
 fn generate_board() -> bool {
     for x in 0..=15 {
         for y in 0..=15 {
             unsafe {
                 BOARD[y][x].value = 0;
-                BOARD[y][x].reveled = false;
+                BOARD[y][x].state = CellState::Hidden;
             }
         }
     }
@@ -34,23 +48,16 @@ fn generate_board() -> bool {
 fn set_mine(x: usize, y: usize) -> bool {
     unsafe {
         BOARD[y][x].value = 9;
-    }
 
-    for k in 0..=2 {
-        for l in 0..=2 {
-            if x + k < 1 || x + k > 16 {
-                continue;
-            }
-            if y + l < 1 || y + l > 16 {
-                continue;
-            }
+        for k in 0..=2 {
+            for l in 0..=2 {
+                if y + k > 0 && x + l > 0 && y + k < 17 && x + l < 17 {
+                    if BOARD[y + k - 1][x + l - 1].value == 9 {
+                        continue;
+                    }
 
-            unsafe {
-                if BOARD[x + k - 1][y + l - 1].value == 9 {
-                    continue;
+                    BOARD[y + k - 1][x + l - 1].value += 1;
                 }
-
-                BOARD[x + k - 1][y + l - 1].value += 1;
             }
         }
     }
@@ -66,10 +73,9 @@ fn generate_mines() {
     while count > 0 {
         pos_x = rand::thread_rng().gen_range(0..=15);
         pos_y = rand::thread_rng().gen_range(0..=15);
-
         unsafe {
             if BOARD[pos_y][pos_x].value != 9 {
-                set_mine(pos_y, pos_x);
+                set_mine(pos_x, pos_y);
                 count -= 1;
             }
         }
@@ -85,26 +91,25 @@ fn clear_terminal() {
 fn show_board() {
     clear_terminal();
 
-    unsafe {
-        for i in 0..=15 {
-            for j in 0..=15 {
-                /*if i == POS_X && j == POS_Y {
-                    print!("# ");
-                } else {*/
-                if BOARD[i][j].reveled {
+    for i in 0..=15 {
+        for j in 0..=15 {
+            unsafe {
+                if BOARD[i][j].state == CellState::Revealed {
                     if BOARD[i][j].value == 0 {
                         print!("  ");
                     } else {
                         print!("{} ", BOARD[i][j].value);
                     }
+                } else if BOARD[i][j].state == CellState::Flagged {
+                    print!("P ");
                 } else {
                     print!("# ");
                 }
-                //}
             }
-            print!("\n");
         }
-
+        print!("\n");
+    }
+    unsafe {
         println!("Cursor position:");
         println!("X: {}", POS_X);
         println!("Y: {}", POS_Y);
@@ -113,22 +118,12 @@ fn show_board() {
 
 fn reveal_cell(mut x: usize, mut y: usize) {
     unsafe {
-        if
-        /*x < 0 ||*/
-        x > 15 {
-            return;
-        }
-        if
-        /*y < 0 ||*/
-        y > 15 {
-            return;
-        }
-        if BOARD[y][x].reveled {
+        if x > 15 || y > 15 || BOARD[y][x].state != CellState::Hidden || BOARD[y][x].value == 9 {
             return;
         }
 
-        if BOARD[y][x].reveled == false {
-            BOARD[y][x].reveled = true;
+        if BOARD[y][x].state == CellState::Hidden {
+            BOARD[y][x].state = CellState::Revealed;
         }
     }
 
@@ -137,7 +132,7 @@ fn reveal_cell(mut x: usize, mut y: usize) {
             if x > 0 && y > 0 {
                 x -= 1;
                 y -= 1;
-                reveal_cell(y + i, x + j);
+                reveal_cell(x + i, y + j);
             }
         }
     }
@@ -148,10 +143,20 @@ fn controls() {
         unsafe {
             if key_event.modifiers == KeyModifiers::NONE && key_event.code == KeyCode::Enter {
                 if BOARD[POS_Y][POS_X].value == 9 {
-                    END = 2;
+                    END = GameState::Loosed;
                 }
 
-                reveal_cell(POS_Y, POS_X);
+                reveal_cell(POS_X, POS_Y);
+                show_board();
+            }
+            if key_event.modifiers == KeyModifiers::NONE && key_event.code == KeyCode::Char(' ') {
+                if BOARD[POS_Y][POS_X].state == CellState::Hidden {
+                    BOARD[POS_Y][POS_X].state = CellState::Flagged;
+                } else if BOARD[POS_Y][POS_X].state == CellState::Flagged {
+                    BOARD[POS_Y][POS_X].state = CellState::Hidden;
+                }
+
+                reveal_cell(POS_X, POS_Y);
                 show_board();
             }
 
@@ -180,23 +185,16 @@ fn controls() {
 }
 
 fn check_if_win() -> bool {
-    let mut mines: i32 = 0;
-
     for i in 0..=15 {
         for j in 0..=15 {
             unsafe {
-                if BOARD[i][j].reveled == false {
-                    mines += 1;
+                if BOARD[i][j].value != 9 && BOARD[i][j].state != CellState::Revealed {
+                    return false;
                 }
             }
         }
     }
-
-    if mines == 40 {
-        true
-    } else {
-        false
-    }
+    true
 }
 
 fn main() {
@@ -204,17 +202,18 @@ fn main() {
     generate_mines();
 
     unsafe {
-        while END == 0 {
+        while END == GameState::InProgress {
             controls();
             if check_if_win() {
-                END = 1;
+                END = GameState::Won;
             }
         }
 
-        if END == 1 {
+        if END == GameState::Won {
             println!("You won!");
         }
-        if END == 2 {
+        if END == GameState::Loosed {
+            reveal_cell(POS_X, POS_Y);
             println!("Boom! You loose");
         }
     }

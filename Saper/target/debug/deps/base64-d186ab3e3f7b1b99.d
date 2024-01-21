@@ -1,0 +1,12 @@
+/home/michal/Projects/ChemicalSaper/Saper/target/debug/deps/libbase64-d186ab3e3f7b1b99.rmeta: /home/michal/.cargo/registry/src/index.crates.io-6f17d22bba15001f/base64-0.10.1/src/lib.rs /home/michal/.cargo/registry/src/index.crates.io-6f17d22bba15001f/base64-0.10.1/src/chunked_encoder.rs /home/michal/.cargo/registry/src/index.crates.io-6f17d22bba15001f/base64-0.10.1/src/display.rs /home/michal/.cargo/registry/src/index.crates.io-6f17d22bba15001f/base64-0.10.1/src/tables.rs /home/michal/.cargo/registry/src/index.crates.io-6f17d22bba15001f/base64-0.10.1/src/write/mod.rs /home/michal/.cargo/registry/src/index.crates.io-6f17d22bba15001f/base64-0.10.1/src/write/encoder.rs /home/michal/.cargo/registry/src/index.crates.io-6f17d22bba15001f/base64-0.10.1/src/encode.rs /home/michal/.cargo/registry/src/index.crates.io-6f17d22bba15001f/base64-0.10.1/src/decode.rs
+
+/home/michal/Projects/ChemicalSaper/Saper/target/debug/deps/base64-d186ab3e3f7b1b99.d: /home/michal/.cargo/registry/src/index.crates.io-6f17d22bba15001f/base64-0.10.1/src/lib.rs /home/michal/.cargo/registry/src/index.crates.io-6f17d22bba15001f/base64-0.10.1/src/chunked_encoder.rs /home/michal/.cargo/registry/src/index.crates.io-6f17d22bba15001f/base64-0.10.1/src/display.rs /home/michal/.cargo/registry/src/index.crates.io-6f17d22bba15001f/base64-0.10.1/src/tables.rs /home/michal/.cargo/registry/src/index.crates.io-6f17d22bba15001f/base64-0.10.1/src/write/mod.rs /home/michal/.cargo/registry/src/index.crates.io-6f17d22bba15001f/base64-0.10.1/src/write/encoder.rs /home/michal/.cargo/registry/src/index.crates.io-6f17d22bba15001f/base64-0.10.1/src/encode.rs /home/michal/.cargo/registry/src/index.crates.io-6f17d22bba15001f/base64-0.10.1/src/decode.rs
+
+/home/michal/.cargo/registry/src/index.crates.io-6f17d22bba15001f/base64-0.10.1/src/lib.rs:
+/home/michal/.cargo/registry/src/index.crates.io-6f17d22bba15001f/base64-0.10.1/src/chunked_encoder.rs:
+/home/michal/.cargo/registry/src/index.crates.io-6f17d22bba15001f/base64-0.10.1/src/display.rs:
+/home/michal/.cargo/registry/src/index.crates.io-6f17d22bba15001f/base64-0.10.1/src/tables.rs:
+/home/michal/.cargo/registry/src/index.crates.io-6f17d22bba15001f/base64-0.10.1/src/write/mod.rs:
+/home/michal/.cargo/registry/src/index.crates.io-6f17d22bba15001f/base64-0.10.1/src/write/encoder.rs:
+/home/michal/.cargo/registry/src/index.crates.io-6f17d22bba15001f/base64-0.10.1/src/encode.rs:
+/home/michal/.cargo/registry/src/index.crates.io-6f17d22bba15001f/base64-0.10.1/src/decode.rs:
