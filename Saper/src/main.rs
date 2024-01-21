@@ -1,4 +1,7 @@
 use crossterm::event::{read, Event, KeyCode, KeyModifiers};
+use crossterm::execute;
+use crossterm::style::Stylize;
+use crossterm::terminal::{Clear, ClearType};
 use rand::Rng;
 use std::io::{self, Write};
 use std::usize;
@@ -83,27 +86,45 @@ fn generate_mines() {
 }
 
 fn clear_terminal() {
-    // Wyczyszczenie ekranu przy użyciu sekwencji ANSI
-    print!("\x1B[2J\x1B[H");
+    // Wykonaj polecenie do wyczyszczenia ekranu
+    execute!(io::stdout(), Clear(ClearType::All)).expect("Failed to clear terminal");
+
+    // Ustaw kursor w lewym górnym rogu
+    print!("\x1B[H");
     io::stdout().flush().expect("Failed to flush stdout");
 }
 
 fn show_board() {
+    crossterm::terminal::disable_raw_mode().expect("Failed to disable raw mode");
     clear_terminal();
 
     for i in 0..=15 {
         for j in 0..=15 {
             unsafe {
-                if BOARD[i][j].state == CellState::Revealed {
-                    if BOARD[i][j].value == 0 {
-                        print!("  ");
+                if POS_Y == i && POS_X == j {
+                    if BOARD[i][j].state == CellState::Revealed {
+                        if BOARD[i][j].value == 0 {
+                            print!("{} ", "O".green());
+                        } else {
+                            print!("{} ", BOARD[i][j].value.to_string().green());
+                        }
+                    } else if BOARD[i][j].state == CellState::Flagged {
+                        print!("{} ", "P".green());
                     } else {
-                        print!("{} ", BOARD[i][j].value);
+                        print!("{} ", "#".green());
                     }
-                } else if BOARD[i][j].state == CellState::Flagged {
-                    print!("P ");
                 } else {
-                    print!("# ");
+                    if BOARD[i][j].state == CellState::Revealed {
+                        if BOARD[i][j].value == 0 {
+                            print!("  ");
+                        } else {
+                            print!("{} ", BOARD[i][j].value);
+                        }
+                    } else if BOARD[i][j].state == CellState::Flagged {
+                        print!("P ");
+                    } else {
+                        print!("# ");
+                    }
                 }
             }
         }
@@ -114,6 +135,8 @@ fn show_board() {
         println!("X: {}", POS_X);
         println!("Y: {}", POS_Y);
     }
+
+    crossterm::terminal::enable_raw_mode().expect("Failed to enable raw mode");
 }
 
 fn reveal_cell(mut x: usize, mut y: usize) {
@@ -139,6 +162,7 @@ fn reveal_cell(mut x: usize, mut y: usize) {
 }
 
 fn controls() {
+    crossterm::terminal::enable_raw_mode().expect("Failed to enable raw mode");
     if let Ok(Event::Key(key_event)) = read() {
         unsafe {
             if key_event.modifiers == KeyModifiers::NONE && key_event.code == KeyCode::Enter {
@@ -217,4 +241,6 @@ fn main() {
             println!("Boom! You loose");
         }
     }
+
+    crossterm::terminal::disable_raw_mode().expect("Failed to disable raw mode");
 }
