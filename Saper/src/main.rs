@@ -26,25 +26,41 @@ enum GameState {
     Won,
 }
 
+static mut BOARD: [[Cell; 16]; 16] = [[Cell {
+    value: 0,
+    state: CellState::Hidden,
+}; 16]; 16];
+
 static mut POS_X: usize = 0;
 static mut POS_Y: usize = 0;
 
 static mut END: GameState = GameState::InProgress;
 
-fn set_mine(board: &mut Vec<Vec<Cell>>, x: usize, y: usize) -> bool {
-    let width = board[0].len();
-    let height = board.len();
+fn generate_board() -> bool {
+    for x in 0..=15 {
+        for y in 0..=15 {
+            unsafe {
+                BOARD[y][x].value = 0;
+                BOARD[y][x].state = CellState::Hidden;
+            }
+        }
+    }
+    true
+}
 
-    board[y][x].value = 9;
+fn set_mine(x: usize, y: usize) -> bool {
+    unsafe {
+        BOARD[y][x].value = 9;
 
-    for k in 0..=2 {
-        for l in 0..=2 {
-            if y + k > 0 && x + l > 0 && y + k < height + 1 && x + l < width + 1 {
-                if board[y + k - 1][x + l - 1].value == 9 {
-                    continue;
+        for k in 0..=2 {
+            for l in 0..=2 {
+                if y + k > 0 && x + l > 0 && y + k < 17 && x + l < 17 {
+                    if BOARD[y + k - 1][x + l - 1].value == 9 {
+                        continue;
+                    }
+
+                    BOARD[y + k - 1][x + l - 1].value += 1;
                 }
-
-                board[y + k - 1][x + l - 1].value += 1;
             }
         }
     }
@@ -52,38 +68,21 @@ fn set_mine(board: &mut Vec<Vec<Cell>>, x: usize, y: usize) -> bool {
     true
 }
 
-fn generate_mines(board: &mut Vec<Vec<Cell>>, mut mines: usize) {
-    let width = board[0].len();
-    let height = board.len();
-
+fn generate_mines() {
     let mut pos_x;
     let mut pos_y;
+    let mut count: i32 = 40;
 
-    while mines > 0 {
-        pos_x = rand::thread_rng().gen_range(0..=width - 1);
-        pos_y = rand::thread_rng().gen_range(0..=height - 1);
-        if board[pos_y][pos_x].value != 9 {
-            set_mine(board, pos_x, pos_y);
-            mines -= 1;
+    while count > 0 {
+        pos_x = rand::thread_rng().gen_range(0..=15);
+        pos_y = rand::thread_rng().gen_range(0..=15);
+        unsafe {
+            if BOARD[pos_y][pos_x].value != 9 {
+                set_mine(pos_x, pos_y);
+                count -= 1;
+            }
         }
     }
-}
-
-fn generate_board(width: usize, height: usize, mines: usize) -> Vec<Vec<Cell>> {
-    let mut board: Vec<Vec<Cell>> = vec![
-        vec![
-            Cell {
-                value: 0,
-                state: CellState::Hidden
-            };
-            width
-        ];
-        height
-    ];
-
-    generate_mines(&mut board, mines);
-
-    board
 }
 
 fn clear_terminal() {
@@ -95,36 +94,33 @@ fn clear_terminal() {
     io::stdout().flush().expect("Failed to flush stdout");
 }
 
-fn show_board(board: &mut Vec<Vec<Cell>>) {
+fn show_board() {
     crossterm::terminal::disable_raw_mode().expect("Failed to disable raw mode");
     clear_terminal();
 
-    let width = board[0].len() - 1;
-    let height = board.len() - 1;
-
-    for i in 0..=height {
-        for j in 0..=width {
+    for i in 0..=15 {
+        for j in 0..=15 {
             unsafe {
                 if POS_Y == i && POS_X == j {
-                    if board[i][j].state == CellState::Revealed {
-                        if board[i][j].value == 0 {
+                    if BOARD[i][j].state == CellState::Revealed {
+                        if BOARD[i][j].value == 0 {
                             print!("{} ", "O".green());
                         } else {
-                            print!("{} ", board[i][j].value.to_string().green());
+                            print!("{} ", BOARD[i][j].value.to_string().green());
                         }
-                    } else if board[i][j].state == CellState::Flagged {
+                    } else if BOARD[i][j].state == CellState::Flagged {
                         print!("{} ", "P".green());
                     } else {
                         print!("{} ", "#".green());
                     }
                 } else {
-                    if board[i][j].state == CellState::Revealed {
-                        if board[i][j].value == 0 {
+                    if BOARD[i][j].state == CellState::Revealed {
+                        if BOARD[i][j].value == 0 {
                             print!("  ");
                         } else {
-                            print!("{} ", board[i][j].value);
+                            print!("{} ", BOARD[i][j].value);
                         }
-                    } else if board[i][j].state == CellState::Flagged {
+                    } else if BOARD[i][j].state == CellState::Flagged {
                         print!("P ");
                     } else {
                         print!("# ");
@@ -143,16 +139,15 @@ fn show_board(board: &mut Vec<Vec<Cell>>) {
     crossterm::terminal::enable_raw_mode().expect("Failed to enable raw mode");
 }
 
-fn reveal_cell(board: &mut Vec<Vec<Cell>>, mut x: usize, mut y: usize) {
-    let width = board[0].len() - 1;
-    let height = board.len() - 1;
+fn reveal_cell(mut x: usize, mut y: usize) {
+    unsafe {
+        if x > 15 || y > 15 || BOARD[y][x].state != CellState::Hidden || BOARD[y][x].value == 9 {
+            return;
+        }
 
-    if x > width || y > height || board[y][x].state != CellState::Hidden || board[y][x].value == 9 {
-        return;
-    }
-
-    if board[y][x].state == CellState::Hidden {
-        board[y][x].state = CellState::Revealed;
+        if BOARD[y][x].state == CellState::Hidden {
+            BOARD[y][x].state = CellState::Revealed;
+        }
     }
 
     for i in 0..=2 {
@@ -160,40 +155,37 @@ fn reveal_cell(board: &mut Vec<Vec<Cell>>, mut x: usize, mut y: usize) {
             if x > 0 && y > 0 {
                 x -= 1;
                 y -= 1;
-                reveal_cell(board, x + i, y + j);
+                reveal_cell(x + i, y + j);
             }
         }
     }
 }
 
-fn controls(board: &mut Vec<Vec<Cell>>) {
-    let width = board[0].len() - 1;
-    let height = board.len() - 1;
-
+fn controls() {
     crossterm::terminal::enable_raw_mode().expect("Failed to enable raw mode");
     if let Ok(Event::Key(key_event)) = read() {
         unsafe {
             if key_event.modifiers == KeyModifiers::NONE && key_event.code == KeyCode::Enter {
-                if board[POS_Y][POS_X].value == 9 {
+                if BOARD[POS_Y][POS_X].value == 9 {
                     END = GameState::Loosed;
                 }
 
-                reveal_cell(board, POS_X, POS_Y);
-                show_board(board);
+                reveal_cell(POS_X, POS_Y);
+                show_board();
             }
             if key_event.modifiers == KeyModifiers::NONE && key_event.code == KeyCode::Char(' ') {
-                if board[POS_Y][POS_X].state == CellState::Hidden {
-                    board[POS_Y][POS_X].state = CellState::Flagged;
-                } else if board[POS_Y][POS_X].state == CellState::Flagged {
-                    board[POS_Y][POS_X].state = CellState::Hidden;
+                if BOARD[POS_Y][POS_X].state == CellState::Hidden {
+                    BOARD[POS_Y][POS_X].state = CellState::Flagged;
+                } else if BOARD[POS_Y][POS_X].state == CellState::Flagged {
+                    BOARD[POS_Y][POS_X].state = CellState::Hidden;
                 }
 
-                reveal_cell(board, POS_X, POS_Y);
-                show_board(board);
+                reveal_cell(POS_X, POS_Y);
+                show_board();
             }
 
             if key_event.modifiers == KeyModifiers::NONE && key_event.code == KeyCode::Right {
-                if POS_X < width {
+                if POS_X < 15 {
                     POS_X += 1;
                 }
             }
@@ -208,7 +200,7 @@ fn controls(board: &mut Vec<Vec<Cell>>) {
                 }
             }
             if key_event.modifiers == KeyModifiers::NONE && key_event.code == KeyCode::Down {
-                if POS_Y < height {
+                if POS_Y < 15 {
                     POS_Y += 1;
                 }
             }
@@ -216,14 +208,13 @@ fn controls(board: &mut Vec<Vec<Cell>>) {
     }
 }
 
-fn check_if_win(board: &mut Vec<Vec<Cell>>) -> bool {
-    let width = board[0].len() - 1;
-    let height = board.len() - 1;
-
-    for i in 0..=height {
-        for j in 0..=width {
-            if board[i][j].value != 9 && board[i][j].state != CellState::Revealed {
-                return false;
+fn check_if_win() -> bool {
+    for i in 0..=15 {
+        for j in 0..=15 {
+            unsafe {
+                if BOARD[i][j].value != 9 && BOARD[i][j].state != CellState::Revealed {
+                    return false;
+                }
             }
         }
     }
@@ -231,40 +222,13 @@ fn check_if_win(board: &mut Vec<Vec<Cell>>) -> bool {
 }
 
 fn main() {
-    let mut choose = String::new();
-    let mut board: Vec<Vec<Cell>>;
-
-    clear_terminal();
-
-    println!("Choose the difficulty level:");
-    println!("1. 8x8 board, 10 mines");
-    println!("2. 16x16 board, 40 mines");
-    println!("3. 30x16 board, 99 mines");
-
-    io::stdout().flush().expect("Failed to flush stdout");
-
-    io::stdin()
-        .read_line(&mut choose)
-        .expect("Failed to read line");
-
-    let difficulty = choose.trim().parse::<usize>();
-
-    match difficulty {
-        Ok(1) => board = generate_board(8, 8, 10),
-        Ok(2) => board = generate_board(16, 16, 40),
-        Ok(3) => board = generate_board(30, 16, 99),
-        _ => {
-            println!("Invalid choice. Exiting.");
-            return;
-        }
-    }
-
-    show_board(&mut board);
+    generate_board();
+    generate_mines();
 
     unsafe {
         while END == GameState::InProgress {
-            controls(&mut board);
-            if check_if_win(&mut board) {
+            controls();
+            if check_if_win() {
                 END = GameState::Won;
             }
         }
@@ -273,7 +237,7 @@ fn main() {
             println!("You won!");
         }
         if END == GameState::Loosed {
-            reveal_cell(&mut board, POS_X, POS_Y);
+            reveal_cell(POS_X, POS_Y);
             println!("Boom! You loose");
         }
     }
