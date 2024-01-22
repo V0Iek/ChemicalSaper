@@ -1,6 +1,6 @@
 use crossterm::event::{read, Event, KeyCode, KeyModifiers};
 use crossterm::execute;
-use crossterm::style::Stylize;
+use crossterm::style::{StyledContent, Stylize};
 use crossterm::terminal::{Clear, ClearType};
 use rand::Rng;
 use std::io::{self, Write};
@@ -95,6 +95,23 @@ fn clear_terminal() {
     io::stdout().flush().expect("Failed to flush stdout");
 }
 
+fn color_value(value: i32) -> StyledContent<&'static str> {
+    match value {
+        1 => "1".blue(),
+        2 => "2".green(),
+        3 => "3".red(),
+        4 => "4".dark_blue(),
+        5 => "5".dark_red(),
+        6 => "6".cyan(),
+        7 => "7".yellow(),
+        8 => "8".white(),
+        _ => {
+            println!("Error");
+            "Invalid".on_red()
+        }
+    }
+}
+
 fn show_board(board: &mut Vec<Vec<Cell>>) {
     crossterm::terminal::disable_raw_mode().expect("Failed to disable raw mode");
     clear_terminal();
@@ -122,7 +139,7 @@ fn show_board(board: &mut Vec<Vec<Cell>>) {
                         if board[i][j].value == 0 {
                             print!("  ");
                         } else {
-                            print!("{} ", board[i][j].value);
+                            print!("{} ", color_value(board[i][j].value));
                         }
                     } else if board[i][j].state == CellState::Flagged {
                         print!("P ");
