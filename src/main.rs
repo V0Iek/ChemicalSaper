@@ -40,8 +40,12 @@ fn set_mine(board: &mut Vec<Vec<Cell>>, x: usize, y: usize) -> bool {
     for k in 0..=2 {
         for l in 0..=2 {
             if y + k > 0 && x + l > 0 && y + k < height + 1 && x + l < width + 1 {
-                if board[y + k - 1][x + l - 1].value == 9 {
-                    continue;
+                unsafe {
+                    if board[y + k - 1][x + l - 1].value == 9
+                        || (y + k - 1 == POS_Y && x + l - 1 == POS_X)
+                    {
+                        continue;
+                    }
                 }
 
                 board[y + k - 1][x + l - 1].value += 1;
@@ -52,7 +56,7 @@ fn set_mine(board: &mut Vec<Vec<Cell>>, x: usize, y: usize) -> bool {
     true
 }
 
-fn generate_mines(board: &mut Vec<Vec<Cell>>, mut mines: usize) {
+fn generate_mines(board: &mut Vec<Vec<Cell>>, mut mines: i32) {
     let width = board[0].len();
     let height = board.len();
 
@@ -69,8 +73,8 @@ fn generate_mines(board: &mut Vec<Vec<Cell>>, mut mines: usize) {
     }
 }
 
-fn generate_board(width: usize, height: usize, mines: usize) -> Vec<Vec<Cell>> {
-    let mut board: Vec<Vec<Cell>> = vec![
+fn generate_board(width: usize, height: usize) -> Vec<Vec<Cell>> {
+    let board: Vec<Vec<Cell>> = vec![
         vec![
             Cell {
                 value: 0,
@@ -81,16 +85,12 @@ fn generate_board(width: usize, height: usize, mines: usize) -> Vec<Vec<Cell>> {
         height
     ];
 
-    generate_mines(&mut board, mines);
-
     board
 }
 
 fn clear_terminal() {
-    // Wykonaj polecenie do wyczyszczenia ekranu
     execute!(io::stdout(), Clear(ClearType::All)).expect("Failed to clear terminal");
 
-    // Ustaw kursor w lewym górnym rogu
     print!("\x1B[H");
     io::stdout().flush().expect("Failed to flush stdout");
 }
@@ -125,14 +125,14 @@ fn show_board(board: &mut Vec<Vec<Cell>>) {
                 if POS_Y == i && POS_X == j {
                     if board[i][j].state == CellState::Revealed {
                         if board[i][j].value == 0 {
-                            print!("{} ", "O".green());
+                            print!("{} ", "O".dark_green());
                         } else {
-                            print!("{} ", board[i][j].value.to_string().green());
+                            print!("{} ", board[i][j].value.to_string().dark_green());
                         }
                     } else if board[i][j].state == CellState::Flagged {
-                        print!("{} ", "P".green());
+                        print!("{} ", "P".dark_green());
                     } else {
-                        print!("{} ", "#".green());
+                        print!("{} ", "#".dark_green());
                     }
                 } else {
                     if board[i][j].state == CellState::Revealed {
@@ -183,7 +183,7 @@ fn reveal_cell(board: &mut Vec<Vec<Cell>>, mut x: usize, mut y: usize) {
     }
 }
 
-fn controls(board: &mut Vec<Vec<Cell>>) {
+fn controls(board: &mut Vec<Vec<Cell>>, mines: i32, mines_generated: &mut bool) {
     let width = board[0].len() - 1;
     let height = board.len() - 1;
 
@@ -191,6 +191,11 @@ fn controls(board: &mut Vec<Vec<Cell>>) {
     if let Ok(Event::Key(key_event)) = read() {
         unsafe {
             if key_event.modifiers == KeyModifiers::NONE && key_event.code == KeyCode::Enter {
+                if *mines_generated == false {
+                    generate_mines(board, mines);
+                    *mines_generated = true;
+                }
+
                 if board[POS_Y][POS_X].value == 9 && board[POS_Y][POS_X].state != CellState::Flagged
                 {
                     END = GameState::Loosed;
@@ -251,6 +256,8 @@ fn check_if_win(board: &mut Vec<Vec<Cell>>) -> bool {
 fn main() {
     let mut choose = String::new();
     let mut board: Vec<Vec<Cell>>;
+    let mines: i32;
+    let mut mines_generated = false;
 
     clear_terminal();
 
@@ -268,9 +275,18 @@ fn main() {
     let difficulty = choose.trim().parse::<usize>();
 
     match difficulty {
-        Ok(1) => board = generate_board(8, 8, 10),
-        Ok(2) => board = generate_board(16, 16, 40),
-        Ok(3) => board = generate_board(30, 16, 99),
+        Ok(1) => {
+            board = generate_board(8, 8);
+            mines = 10;
+        }
+        Ok(2) => {
+            board = generate_board(16, 16);
+            mines = 40;
+        }
+        Ok(3) => {
+            board = generate_board(30, 16);
+            mines = 99;
+        }
         _ => {
             println!("Invalid choice. Exiting.");
             return;
@@ -281,7 +297,7 @@ fn main() {
 
     unsafe {
         while END == GameState::InProgress {
-            controls(&mut board);
+            controls(&mut board, mines, &mut mines_generated);
             if check_if_win(&mut board) {
                 END = GameState::Won;
             }
