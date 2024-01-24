@@ -63,6 +63,24 @@ pub fn show_board(board: &Vec<Vec<Cell>>, pos_x: usize, pos_y: usize) {
         }
         println!();
     }
+
+    // for row in board {
+    //     for cell in row {
+    //         if cell.state == CellState::Revealed {
+    //             if cell.value == 0 {
+    //                 print!("  ");
+    //             } else {
+    //                 print!("{} ", color_value(cell.value));
+    //             }
+    //         } else if cell.state == CellState::Flagged {
+    //             print!("P ");
+    //         } else {
+    //             print!("# ");
+    //         }
+    //     }
+    //     println!();
+    // }
+
     println!("Cursor position:");
     println!("X: {}", pos_x);
     println!("Y: {}", pos_y);
@@ -70,24 +88,31 @@ pub fn show_board(board: &Vec<Vec<Cell>>, pos_x: usize, pos_y: usize) {
     crossterm::terminal::enable_raw_mode().expect("Failed to enable raw mode");
 }
 
-pub fn reveal_cell(board: &mut Vec<Vec<Cell>>, mut x: usize, mut y: usize) {
+pub fn reveal_cell(board: &mut Vec<Vec<Cell>>, x: usize, y: usize) {
     let width = board[0].len() - 1;
     let height = board.len() - 1;
 
-    if x > width || y > height || board[y][x].state != CellState::Hidden || board[y][x].value == 9 {
+    if x > width || y > height || board[y][x].value == 9 {
         return;
     }
 
     if board[y][x].state == CellState::Hidden {
         board[y][x].state = CellState::Revealed;
+    } else {
+        return;
     }
 
-    for i in 0..=2 {
-        for j in 0..=2 {
-            if x > 0 && y > 0 {
-                x -= 1;
-                y -= 1;
-                reveal_cell(board, x + i, y + j);
+    for i in -1..=1 {
+        for j in -1..=1 {
+            let new_x = x as isize + j as isize;
+            let new_y = y as isize + i as isize;
+
+            if new_x >= 0 && new_y >= 0 && new_x <= width as isize && new_y <= height as isize {
+                if board[new_y as usize][new_x as usize].value == 9 {
+                    return;
+                }
+
+                reveal_cell(board, new_x as usize, new_y as usize);
             }
         }
     }

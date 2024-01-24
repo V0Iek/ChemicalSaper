@@ -4,12 +4,9 @@ use ::lib::{
 use std::io::{self, Write};
 
 fn check_if_win(board: &mut Vec<Vec<Cell>>) -> bool {
-    let width = board[0].len() - 1;
-    let height = board.len() - 1;
-
-    for i in 0..=height {
-        for j in 0..=width {
-            if board[i][j].value != 9 && board[i][j].state != CellState::Revealed {
+    for row in board {
+        for cell in row {
+            if cell.value != 9 && cell.state != CellState::Revealed {
                 return false;
             }
         }

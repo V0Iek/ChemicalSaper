@@ -2,20 +2,20 @@ use crate::other::{Cell, CellState};
 use rand::Rng;
 
 fn set_mine(board: &mut Vec<Vec<Cell>>, x: usize, y: usize) {
-    let width = board[0].len() + 1;
-    let height = board.len() + 1;
+    let width = board[0].len();
+    let height = board.len();
 
     board[y][x].value = 9;
 
-    for k in 0..=2 {
-        for l in 0..=2 {
-            if y + k > 0
-                && x + l > 0
-                && y + k < height
-                && x + l < width
-                && board[y + k - 1][x + l - 1].value != 9
-            {
-                board[y + k - 1][x + l - 1].value += 1;
+    for k in -1..=1 {
+        for l in -1..=1 {
+            let new_y = y as isize + k as isize;
+            let new_x = x as isize + l as isize;
+
+            if new_y >= 0 && new_y < height as isize && new_x >= 0 && new_x < width as isize {
+                if board[new_y as usize][new_x as usize].value != 9 {
+                    board[new_y as usize][new_x as usize].value += 1;
+                }
             }
         }
     }
