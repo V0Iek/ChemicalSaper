@@ -1,5 +1,6 @@
-use crate::functions::{generate_mines, reveal_cell};
+use crate::generation::generate_mines;
 use crate::other::{Cell, CellState, GameState};
+use crate::visuals::reveal_cell;
 use crossterm::event::{read, Event, KeyCode};
 
 pub fn controls(
