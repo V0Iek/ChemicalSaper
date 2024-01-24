@@ -20,7 +20,7 @@ fn check_if_win(board: &mut Vec<Vec<Cell>>) -> bool {
 fn main() {
     let mut choose = String::new();
     let mut board: Vec<Vec<Cell>>;
-    let mines: i32;
+    let mines: usize;
     let mut mines_generated = false;
 
     let mut game_state = GameState::InProgress;
@@ -61,7 +61,7 @@ fn main() {
         }
     }
 
-    show_board(board.clone(), pos_x, pos_y);
+    show_board(&board, pos_x, pos_y);
 
     while game_state == GameState::InProgress {
         controls(
@@ -77,7 +77,7 @@ fn main() {
             game_state = GameState::Won;
         }
 
-        show_board(board.clone(), pos_x, pos_y);
+        show_board(&board, pos_x, pos_y);
     }
 
     if game_state == GameState::Won {
@@ -85,7 +85,7 @@ fn main() {
     }
     if game_state == GameState::Lost {
         reveal_cell(&mut board, pos_x, pos_y);
-        show_board(board, pos_x, pos_y);
+        show_board(&board, pos_x, pos_y);
         println!("Boom! You loose");
     }
 

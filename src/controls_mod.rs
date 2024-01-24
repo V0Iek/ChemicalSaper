@@ -8,7 +8,7 @@ pub fn controls(
     pos_x: &mut usize,
     pos_y: &mut usize,
     game_state: &mut GameState,
-    mines: i32,
+    mines: usize,
     mines_generated: &mut bool,
 ) {
     let width = board[0].len() - 1;

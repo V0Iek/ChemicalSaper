@@ -28,7 +28,7 @@ fn color_value(value: i32) -> StyledContent<&'static str> {
     }
 }
 
-pub fn show_board(board: Vec<Vec<Cell>>, pos_x: usize, pos_y: usize) {
+pub fn show_board(board: &Vec<Vec<Cell>>, pos_x: usize, pos_y: usize) {
     crossterm::terminal::disable_raw_mode().expect("Failed to disable raw mode");
     clear_terminal();
 
@@ -49,21 +49,19 @@ pub fn show_board(board: Vec<Vec<Cell>>, pos_x: usize, pos_y: usize) {
                 } else {
                     print!("{} ", "#".dark_green());
                 }
-            } else {
-                if board[i][j].state == CellState::Revealed {
-                    if board[i][j].value == 0 {
-                        print!("  ");
-                    } else {
-                        print!("{} ", color_value(board[i][j].value));
-                    }
-                } else if board[i][j].state == CellState::Flagged {
-                    print!("P ");
+            } else if board[i][j].state == CellState::Revealed {
+                if board[i][j].value == 0 {
+                    print!("  ");
                 } else {
-                    print!("# ");
+                    print!("{} ", color_value(board[i][j].value));
                 }
+            } else if board[i][j].state == CellState::Flagged {
+                print!("P ");
+            } else {
+                print!("# ");
             }
         }
-        print!("\n");
+        println!();
     }
     println!("Cursor position:");
     println!("X: {}", pos_x);
