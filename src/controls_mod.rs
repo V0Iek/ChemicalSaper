@@ -1,3 +1,4 @@
+use crate::generate_mines;
 use crate::other::{Cell, CellState, GameState};
 use crate::visuals::reveal_cell;
 use crossterm::event::{read, Event, KeyCode};
@@ -7,6 +8,8 @@ pub fn controls(
     pos_x: &mut usize,
     pos_y: &mut usize,
     game_state: &mut GameState,
+    mines_generated: &mut bool,
+    mines: usize,
 ) {
     let width = board[0].len() - 1;
     let height = board.len() - 1;
@@ -16,6 +19,11 @@ pub fn controls(
     if let Ok(Event::Key(key_event)) = read() {
         match key_event.code {
             KeyCode::Enter => {
+                if !*mines_generated {
+                    generate_mines(board, mines, *pos_x, *pos_y);
+                    *mines_generated = true;
+                }
+
                 if board[*pos_y][*pos_x].value == 9
                     && board[*pos_y][*pos_x].state != CellState::Flagged
                 {

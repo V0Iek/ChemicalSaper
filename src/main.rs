@@ -1,6 +1,5 @@
 use lib::{
-    clear_terminal, controls, generate_board, generate_mines, reveal_cell, show_board, Cell,
-    CellState, GameState,
+    clear_terminal, controls, generate_board, reveal_cell, show_board, Cell, CellState, GameState,
 };
 use std::io::{self, Write};
 use std::num::ParseIntError;
@@ -40,6 +39,7 @@ fn main() {
     let mut pos_x: usize = 0;
     let mut pos_y: usize = 0;
     let mut board: Vec<Vec<Cell>>;
+    let mut mines_generated = false;
 
     let mines: usize;
 
@@ -61,16 +61,22 @@ fn main() {
                 break;
             }
             _ => {
-                println!("Invalid choice. Please provide choose option");
+                eprintln!("Invalid choice. Please provide a valid option");
             }
         }
     }
 
-    generate_mines(&mut board, mines);
     show_board(&board, pos_x, pos_y, mines);
 
     while game_state == GameState::InProgress {
-        controls(&mut board, &mut pos_x, &mut pos_y, &mut game_state);
+        controls(
+            &mut board,
+            &mut pos_x,
+            &mut pos_y,
+            &mut game_state,
+            &mut mines_generated,
+            mines,
+        );
 
         if check_if_win(&mut board) {
             game_state = GameState::Won;
