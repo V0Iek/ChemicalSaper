@@ -1,8 +1,9 @@
-use ::lib::{
-    clear_terminal, controls, generate_board, reveal_cell, show_board, Cell, CellState, GameState,
+use lib::{
+    clear_terminal, controls, generate_board, generate_mines, reveal_cell, show_board, Cell,
+    CellState, GameState,
 };
-use lib::generate_mines;
 use std::io::{self, Write};
+use std::num::ParseIntError;
 
 fn check_if_win(board: &mut Vec<Vec<Cell>>) -> bool {
     for row in board {
@@ -15,15 +16,8 @@ fn check_if_win(board: &mut Vec<Vec<Cell>>) -> bool {
     true
 }
 
-fn main() {
-    let mut game_state = GameState::InProgress;
-    let mut pos_x: usize = 0;
-    let mut pos_y: usize = 0;
-    let mut board: Vec<Vec<Cell>>;
-
+fn choose_difficulty() -> Result<usize, ParseIntError> {
     let mut choose = String::new();
-    let mines: usize;
-    // let mut mines_generated = false;
 
     clear_terminal();
 
@@ -38,24 +32,37 @@ fn main() {
         .read_line(&mut choose)
         .expect("Failed to read line");
 
-    let difficulty = choose.trim().parse::<usize>();
+    choose.trim().parse::<usize>()
+}
 
-    match difficulty {
-        Ok(1) => {
-            board = generate_board(8, 8);
-            mines = 10;
-        }
-        Ok(2) => {
-            board = generate_board(16, 16);
-            mines = 40;
-        }
-        Ok(3) => {
-            board = generate_board(30, 16);
-            mines = 99;
-        }
-        _ => {
-            println!("Invalid choice. Exiting.");
-            return;
+fn main() {
+    let mut game_state = GameState::InProgress;
+    let mut pos_x: usize = 0;
+    let mut pos_y: usize = 0;
+    let mut board: Vec<Vec<Cell>>;
+
+    let mines: usize;
+
+    loop {
+        match choose_difficulty() {
+            Ok(1) => {
+                board = generate_board(8, 8);
+                mines = 10;
+                break;
+            }
+            Ok(2) => {
+                board = generate_board(16, 16);
+                mines = 40;
+                break;
+            }
+            Ok(3) => {
+                board = generate_board(30, 16);
+                mines = 99;
+                break;
+            }
+            _ => {
+                println!("Invalid choice. Please provide choose option");
+            }
         }
     }
 
