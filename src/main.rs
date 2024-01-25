@@ -60,23 +60,16 @@ fn main() {
     }
 
     generate_mines(&mut board, mines);
-    show_board(&board, pos_x, pos_y);
+    show_board(&board, pos_x, pos_y, mines);
 
     while game_state == GameState::InProgress {
-        controls(
-            &mut board,
-            &mut pos_x,
-            &mut pos_y,
-            &mut game_state,
-            // mines,
-            // &mut mines_generated,
-        );
+        controls(&mut board, &mut pos_x, &mut pos_y, &mut game_state);
 
         if check_if_win(&mut board) {
             game_state = GameState::Won;
         }
 
-        show_board(&board, pos_x, pos_y);
+        show_board(&board, pos_x, pos_y, mines);
     }
 
     if game_state == GameState::Won {
@@ -84,7 +77,7 @@ fn main() {
     }
     if game_state == GameState::Lost {
         reveal_cell(&mut board, pos_x, pos_y);
-        show_board(&board, pos_x, pos_y);
+        show_board(&board, pos_x, pos_y, mines);
         println!("Boom! You loose");
     }
 

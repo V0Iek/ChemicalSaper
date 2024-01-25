@@ -28,7 +28,21 @@ fn color_value(value: i32) -> StyledContent<&'static str> {
     }
 }
 
-pub fn show_board(board: &Vec<Vec<Cell>>, pos_x: usize, pos_y: usize) {
+fn count_flags(board: &Vec<Vec<Cell>>) -> usize {
+    let mut flags: usize = 0;
+
+    for row in board {
+        for cell in row {
+            if cell.state == CellState::Flagged {
+                flags += 1;
+            }
+        }
+    }
+
+    flags
+}
+
+pub fn show_board(board: &Vec<Vec<Cell>>, pos_x: usize, pos_y: usize, mines: usize) {
     crossterm::terminal::disable_raw_mode().expect("Failed to disable raw mode");
     clear_terminal();
 
@@ -61,25 +75,15 @@ pub fn show_board(board: &Vec<Vec<Cell>>, pos_x: usize, pos_y: usize) {
                 print!("# ");
             }
         }
-        println!();
-    }
 
-    // for row in board {
-    //     for cell in row {
-    //         if cell.state == CellState::Revealed {
-    //             if cell.value == 0 {
-    //                 print!("  ");
-    //             } else {
-    //                 print!("{} ", color_value(cell.value));
-    //             }
-    //         } else if cell.state == CellState::Flagged {
-    //             print!("P ");
-    //         } else {
-    //             print!("# ");
-    //         }
-    //     }
-    //     println!();
-    // }
+        if i == 0 {
+            println!("    Mines:");
+        } else if i == 1 {
+            println!("    {}/{}", count_flags(board), mines);
+        } else {
+            println!();
+        }
+    }
 
     println!("Cursor position:");
     println!("X: {}", pos_x);
