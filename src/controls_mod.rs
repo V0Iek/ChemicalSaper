@@ -8,8 +8,8 @@ pub fn controls(
     pos_x: &mut usize,
     pos_y: &mut usize,
     game_state: &mut GameState,
-    mines: usize,
-    mines_generated: &mut bool,
+    // mines: usize,
+    // mines_generated: &mut bool,
 ) {
     let width = board[0].len() - 1;
     let height = board.len() - 1;
@@ -19,10 +19,11 @@ pub fn controls(
     if let Ok(Event::Key(key_event)) = read() {
         match key_event.code {
             KeyCode::Enter => {
-                if !*mines_generated {
+                /*if !*mines_generated {
                     generate_mines(board, *pos_x, *pos_y, mines);
                     *mines_generated = true;
-                } else if board[*pos_y][*pos_x].value == 9
+                } else*/
+                if board[*pos_y][*pos_x].value == 9
                     && board[*pos_y][*pos_x].state != CellState::Flagged
                 {
                     *game_state = GameState::Lost;

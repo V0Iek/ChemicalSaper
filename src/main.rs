@@ -1,6 +1,7 @@
 use ::lib::{
     clear_terminal, controls, generate_board, reveal_cell, show_board, Cell, CellState, GameState,
 };
+use lib::generate_mines;
 use std::io::{self, Write};
 
 fn check_if_win(board: &mut Vec<Vec<Cell>>) -> bool {
@@ -15,14 +16,14 @@ fn check_if_win(board: &mut Vec<Vec<Cell>>) -> bool {
 }
 
 fn main() {
-    let mut choose = String::new();
-    let mut board: Vec<Vec<Cell>>;
-    let mines: usize;
-    let mut mines_generated = false;
-
     let mut game_state = GameState::InProgress;
     let mut pos_x: usize = 0;
     let mut pos_y: usize = 0;
+    let mut board: Vec<Vec<Cell>>;
+
+    let mut choose = String::new();
+    let mines: usize;
+    // let mut mines_generated = false;
 
     clear_terminal();
 
@@ -58,6 +59,7 @@ fn main() {
         }
     }
 
+    generate_mines(&mut board, mines);
     show_board(&board, pos_x, pos_y);
 
     while game_state == GameState::InProgress {
@@ -66,8 +68,8 @@ fn main() {
             &mut pos_x,
             &mut pos_y,
             &mut game_state,
-            mines,
-            &mut mines_generated,
+            // mines,
+            // &mut mines_generated,
         );
 
         if check_if_win(&mut board) {
