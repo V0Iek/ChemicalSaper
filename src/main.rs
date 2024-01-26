@@ -91,7 +91,7 @@ fn main() {
     if game_state == GameState::Lost {
         reveal_cell(&mut board, pos_x, pos_y);
         show_board(&board, pos_x, pos_y, mines);
-        println!("Boom! You loose");
+        println!("Boom! You lost");
     }
 
     crossterm::terminal::disable_raw_mode().expect("Failed to disable raw mode");

@@ -54,14 +54,14 @@ pub fn show_board(board: &Vec<Vec<Cell>>, pos_x: usize, pos_y: usize, mines: usi
             if pos_y == i && pos_x == j {
                 if board[i][j].state == CellState::Revealed {
                     if board[i][j].value == 0 {
-                        print!("{} ", "O".dark_green());
+                        print!("{} ", " ".on_grey());
                     } else {
-                        print!("{} ", board[i][j].value.to_string().dark_green());
+                        print!("{} ", color_value(board[i][j].value).to_string().on_grey());
                     }
                 } else if board[i][j].state == CellState::Flagged {
-                    print!("{} ", "P".dark_green());
+                    print!("{} ", "P".on_grey());
                 } else {
-                    print!("{} ", "#".dark_green());
+                    print!("{} ", "#".on_grey());
                 }
             } else if board[i][j].state == CellState::Revealed {
                 if board[i][j].value == 0 {
