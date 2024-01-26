@@ -1,4 +1,5 @@
-use crate::other::{Cell, CellState};
+use crate::enums::CellState;
+use crate::structs::Cell;
 use crossterm::execute;
 use crossterm::style::{StyledContent, Stylize};
 use crossterm::terminal::{Clear, ClearType};

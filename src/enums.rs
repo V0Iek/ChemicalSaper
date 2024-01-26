@@ -11,9 +11,3 @@ pub enum GameState {
     Lost,
     Won,
 }
-
-#[derive(Clone, Copy)]
-pub struct Cell {
-    pub value: i32,
-    pub state: CellState,
-}

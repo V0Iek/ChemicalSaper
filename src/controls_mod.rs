@@ -1,5 +1,6 @@
+use crate::enums::{CellState, GameState};
 use crate::generate_mines;
-use crate::other::{Cell, CellState, GameState};
+use crate::structs::Cell;
 use crate::visuals::reveal_cell;
 use crossterm::event::{read, Event, KeyCode};
 

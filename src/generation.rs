@@ -1,4 +1,5 @@
-use crate::other::{Cell, CellState};
+use crate::enums::CellState;
+use crate::structs::Cell;
 use rand::Rng;
 
 fn set_mine(board: &mut Vec<Vec<Cell>>, x: usize, y: usize) {
