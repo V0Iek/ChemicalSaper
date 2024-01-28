@@ -663,7 +663,6 @@ name = "rustyminesweeper"
 version = "0.1.0"
 dependencies = [
  "crossterm",
- "gio",
  "gtk",
  "rand",
 ]

@@ -22,9 +22,12 @@ fn set_mine(board: &mut Vec<Vec<Cell>>, x: usize, y: usize) {
     }
 }
 
-pub fn generate_mines(board: &mut Vec<Vec<Cell>>, mut mines: usize, pos_x: usize, pos_y: usize) {
+pub fn generate_mines(board: &mut Vec<Vec<Cell>>, mut mines: usize) {
     let width = board[0].len() - 1;
     let height = board.len() - 1;
+
+    let pos_x: usize = 0;
+    let pos_y: usize = 0;
 
     while mines > 0 {
         let x = rand::thread_rng().gen_range(0..=width);

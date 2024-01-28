@@ -1,6 +1,8 @@
 use crate::enums::CellState;
+use crate::generation::{generate_board, generate_mines};
 use gtk::prelude::*;
 use gtk::{Grid, Label};
+//use gtk::Inhibit;
 
 #[derive(Clone, Copy)]
 pub struct Cell {
@@ -17,16 +19,9 @@ pub struct Minesweeper {
 
 impl Minesweeper {
     pub fn new(width: usize, height: usize, mine_count: usize) -> Minesweeper {
-        let board = vec![
-            vec![
-                Cell {
-                    value: 0,
-                    state: CellState::Hidden
-                };
-                width
-            ];
-            height
-        ];
+        let mut board = generate_board(width, height);
+
+        generate_mines(&mut board, mine_count);
 
         Minesweeper {
             width,
@@ -34,6 +29,10 @@ impl Minesweeper {
             mine_count,
             board,
         }
+    }
+
+    fn handle_cell_click(&self, x: usize, y: usize) {
+        println!("Cell {} {} clicked", x, y);
     }
 
     pub fn display_board(&self, grid: &Grid) {
@@ -48,6 +47,11 @@ impl Minesweeper {
                     CellState::Flagged => label.set_text("P"),
                     CellState::Revealed => label.set_text(&self.board[row][col].value.to_string()),
                 }
+
+                label.connect_button_press_event(move |_, _| {
+                    self.handle_cell_click(col, row);
+                    Inhibit(false)
+                });
 
                 grid.attach(&label, col as i32, row as i32, 1, 1);
             }
