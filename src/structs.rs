@@ -1,8 +1,8 @@
 use crate::enums::CellState;
 use crate::generation::{generate_board, generate_mines};
+// use glib::signal::Inhibit;
 use gtk::prelude::*;
 use gtk::{Grid, Label};
-//use gtk::Inhibit;
 
 #[derive(Clone, Copy)]
 pub struct Cell {
