@@ -9,3 +9,9 @@ pub use generation::{generate_board, generate_mines};
 
 pub mod controls_mod;
 pub use controls_mod::controls;
+
+pub mod ui;
+pub use ui::{init_game, next_round};
+
+pub mod mechanics;
+pub use mechanics::game_loop;

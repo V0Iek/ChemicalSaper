@@ -10,6 +10,7 @@ pub enum GameState {
     InProgress,
     Lost,
     Won,
+    Ended,
 }
 
 #[derive(Clone, Copy)]
